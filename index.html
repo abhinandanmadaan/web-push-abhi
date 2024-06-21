@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset=utf-8 />
+    <title>Web Push</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+        .header {
+            font-family: monospace;
+            font-size: 1.1em;
+        }
+        .joke {
+            margin-bottom: 10px;
+        }
+    </style>
+
+</head>
+<body>
+<button class="js-push-btn">Enable/Disable Push Notifications</button>
+</body>
+<section class="subscription-details js-subscription-details is-invisible">
+    <pre><code class="js-subscription-json"></code></pre>
+</section>
+<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js" type="module"></script>
+<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-messaging-compat.js" type="module"></script>
+<script type="module">
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyBQhnlhociHucGdwk5lkqy0gXruyELekAI",
+        authDomain: "web-push-demo-99815.firebaseapp.com",
+        projectId: "web-push-demo-99815",
+        storageBucket: "web-push-demo-99815.appspot.com",
+        messagingSenderId: "1059431989933",
+        appId: "1:1059431989933:web:842fc48d3f73bb89203c24",
+        measurementId: "G-22L57Q8N5Q"
+    };
+    let swRegistration = null;
+    if ('serviceWorker' in navigator) {
+
+        console.log('Service Worker and Push are supported');
+        window.addEventListener('load', function() {
+            navigator.serviceWorker.register('/firebase-messaging-sw.js')
+                .then(function(swReg) {
+                    console.log('Service Worker is registered', swReg);
+
+                    swRegistration = swReg;
+                    initializeUI();
+                })
+                .catch(function(error) {
+                    console.error('Service Worker Error', error);
+                });
+        })
+    }else {
+        console.warn('Push messaging is not supported');
+    }
+
+
+    function initializeUI() {
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig)
+        const messagingObject = firebase.messaging();
+
+        // Set VAPID key
+        messagingObject.getToken({ vapidKey: 'BEmAVlZuKUS6BKpeU4PZg9XFsihcXgfg_4l2MC-9l2El79yKlSlc2RhL1WKEiKwaB8_3JORdF4WL25fC-5M4v1k' }).then((currentToken) => {
+            if (currentToken) {
+                const url = 'http://localhost:8080/register?token=' + encodeURIComponent(currentToken) + '&user=shivangi';
+                fetch(url, { method: 'post'});
+                console.log('Token:', currentToken);
+            } else {
+                console.log('No registration token available. Request permission to generate one.');
+            }
+        }).catch((err) => {
+            console.log('An error occurred while retrieving token. ', err);
+        });
+
+        // subscribeUser();
+
+        swRegistration.pushManager.getSubscription()
+            .then(function(subscription) {
+                const isSubscribed = !(subscription === null);
+
+                if (isSubscribed) {
+                    console.log('User IS subscribed.');
+                } else {
+                    console.log('User is NOT subscribed.');
+                }
+            });
+    }
+
+
+</script>
+<!--<script src="firebase-service-worker.js"></script>-->
+</body>
+</html>
