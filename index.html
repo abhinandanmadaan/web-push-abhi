@@ -41,7 +41,7 @@
 
         console.log('Service Worker and Push are supported');
         window.addEventListener('load', function() {
-            navigator.serviceWorker.register('ab/firebase-messaging-sw.js')
+            navigator.serviceWorker.register('../firebase-messaging-sw.js')
                 .then(function(swReg) {
                     console.log('Service Worker is registered', swReg);
 
