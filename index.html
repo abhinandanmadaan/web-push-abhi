@@ -41,7 +41,7 @@
 
         console.log('Service Worker and Push are supported');
         window.addEventListener('load', function() {
-            navigator.serviceWorker.register('/firebase-messaging-sw.js')
+            navigator.serviceWorker.register('firebase-messaging-sw.js')
                 .then(function(swReg) {
                     console.log('Service Worker is registered', swReg);
 
@@ -66,8 +66,7 @@
         // Set VAPID key
         messagingObject.getToken({ vapidKey: 'BEmAVlZuKUS6BKpeU4PZg9XFsihcXgfg_4l2MC-9l2El79yKlSlc2RhL1WKEiKwaB8_3JORdF4WL25fC-5M4v1k' }).then((currentToken) => {
             if (currentToken) {
-                const url = 'http://localhost:8080/register?token=' + encodeURIComponent(currentToken) + '&user=shivangi';
-                fetch(url, { method: 'post'});
+
                 console.log('Token:', currentToken);
             } else {
                 console.log('No registration token available. Request permission to generate one.');
