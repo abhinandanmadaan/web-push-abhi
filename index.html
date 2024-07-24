@@ -202,7 +202,7 @@
                   const button = document.getElementById('subscribeButton'); // Replace with your button ID
                   button.addEventListener('click', function() {
                       window.safari.pushNotification.requestPermission(
-                          'https://shivangipatel225.github.io', // Your website URL
+                          'https://abhinandanmadaan.github.io', // Your website URL
                           'web.adobe.ans.test', // Your website Push ID
                           {}, // Data to send with the permission request, if needed
                           function(permissionData) {
@@ -215,7 +215,7 @@
 
               console.log('Service Worker and Push are supported');
               
-              navigator.serviceWorker.register('https://shivangipatel225.github.io/WebPushDemoShivangi/firebase-messaging-sw.js')
+              navigator.serviceWorker.register('https://abhinandanmadaan.github.io/web-push-abhi/firebase-messaging-sw.js')
                   .then(function(swReg) {
                       firebase.initializeApp(firebaseConfig)
                       const messagingObject = firebase.messaging();
