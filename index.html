@@ -1,33 +1,153 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <meta charset=utf-8 />
-    <title>Web Push</title>
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        }
-        .header {
-            font-family: monospace;
-            font-size: 1.1em;
-        }
-        .joke {
+  <title>CCPT-2115 - [ANS] PoC - Web push notifications with Acrobat web.</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js" type="module"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-messaging-compat.js" type="module"></script>
+  <script src="firebase-messaging-sw.js"></script>  
+
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+  
+
+  <style>
+        
+        .bd-example {
+            border-color: rgb(222, 226, 230);
+            border-style : solid;
+            border-width: 1px;
+            padding: 5px 15px 5px 15px;
+            width: 60%;
             margin-bottom: 10px;
+        }
+        .h3, h3 {
+            margin-top: 5px;
+            margin-bottom: 5px;
+        }
+        .form-text{
+          text-align: end;
+          color: grey;
+        }
+
+        .form-label{
+          font-weight: normal;
         }
     </style>
 
 </head>
-<body>
-<button class="js-push-btn">Enable/Disable Push Notifications</button>
-</body>
-<section class="subscription-details js-subscription-details is-invisible">
-    <pre><code class="js-subscription-json"></code></pre>
-</section>
-<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js" type="module"></script>
-<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-messaging-compat.js" type="module"></script>
-<script type="module">
 
-    const firebaseConfig = {
+<body>
+
+  <!-- 
+    *****************
+    ALL HTML Blocks 
+    ***************** 
+  --->
+
+  <div class="container">
+    <h3>Demo for Web push notifications with Acrobat web</h3>
+    <br/><br/>
+    <div class="bd-example" id="div1">
+
+      <form action="#">
+        <div class="form-group">
+          <label for="appId" class="form-label">Enter ANS AppId</label>
+          <input type="text" id="appId" class="form-control" aria-describedby="appIdHelpBlock" placeholder="Enter ANS AppId" value="webPushTestApp">
+          
+        </div>
+
+        <div class="form-group">
+          <label for="targetId" class="form-label">Enter IMS user Id (Anonymous users are not supported) </label>
+          <input type="text" id="targetId" class="form-control" aria-describedby="targetIdHelpBlock" placeholder="Enter logged in user's adobe ID" value="default">
+          
+        </div>
+
+        <div class="form-group">
+          <label for="locale" class="form-label">Enter Locale</label>
+          <input type="text" id="locale" class="form-control" aria-describedby="localeHelpBlock" placeholder="Enter locale" value="en_US">
+          
+        </div>
+
+        <div class="form-group">
+          <label for="browserVersionMin" class="form-label">Enter min browser version</label>
+          <input type="text" id="browserVersionMin" class="form-control" aria-describedby="browserVersionMinHelpBlock" placeholder="Enter Browser version min" value="1">
+          
+        </div>
+
+        <div class="form-group">
+          <label for="browserVersionMax" class="form-label">Enter max browser version</label>
+          <input type="text" id="browserVersionMax" class="form-control" aria-describedby="browserVersionMaxHelpBlock" placeholder="Enter Browser version max" value="10">
+          
+        </div>
+
+        <div class="form-group">
+          <label for="browserName" class="form-label">Enter Browser name - (Chrome, Safari, Edge, Firefox) </label>
+          <input type="text" id="browserName" class="form-control" aria-describedby="browserNameHelpBlock" placeholder="Enter Browser Name" value="Chrome">
+          
+        </div>
+
+        <div class="form-group">
+          <label for="token" class="form-label">Enter Authorization token</label>
+          <input type="text" id="token" class="form-control" aria-describedby="tokenHelpBlock" placeholder="Enter IMS User token" value="default">
+          
+        </div>
+
+        <div class="form-group">
+          <label for="apiKey" class="form-label">Enter IMS API key</label>
+          <input type="text" id="apiKey" class="form-control" aria-describedby="apiKeyHelpBlock" placeholder="Enter ANS API key" value="ANS1">
+         
+        </div>
+
+        <button type="submit" id="runScript" class="btn btn-default">Register</button>
+        <button type="submit" id="unregisterButton" class="btn btn-default">Unregister</button>
+
+      </form>
+    </div> <!-- end of  div1 -->
+    <div class="row">
+        <div class="col-md-12">
+          <label id="webPushIdLabel" style="background-color: yellow;"></label>
+            <table id="conversation" class="table table-striped">
+                <thead>
+                <tr>
+                    <th>Info!!</th>
+                </tr>
+                </thead>
+                <tbody id="info">
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+  </div>
+
+  <!-- 
+    *****************
+    ALL Java scripts 
+    ***************** 
+  --->
+  <script type="module">
+    
+    window.onload = function() {
+      const wpId = localStorage.getItem(document.getElementById('appId').value);
+      const registerButton = document.getElementById('runScript');
+      const unregisterButton = document.getElementById('unregisterButton');
+
+          if (wpId) {
+              registerButton.style.display = 'none';
+              $("#info").html(`<tr><td style='word-wrap: break-word'> A subscription already exists for the given appId. The subcscription ID is: ${wpId} </td></tr>`);
+          } else {
+              unregisterButton.style.display = 'none';
+          }
+    };
+      let swRegistration = null;
+      let webPushId = null;
+
+      const firebaseConfig = {
         apiKey: "AIzaSyBQhnlhociHucGdwk5lkqy0gXruyELekAI",
         authDomain: "web-push-demo-99815.firebaseapp.com",
         projectId: "web-push-demo-99815",
@@ -35,62 +155,199 @@
         messagingSenderId: "1059431989933",
         appId: "1:1059431989933:web:842fc48d3f73bb89203c24",
         measurementId: "G-22L57Q8N5Q"
-    };
-    let swRegistration = null;
-    if ('serviceWorker' in navigator) {
+      };
+      
+      /// ***** handlePermissionResult **** 
+      // Description -- 
+      // 
 
-        console.log('Service Worker and Push are supported');
-        window.addEventListener('load', function() {
-            navigator.serviceWorker.register('../firebase-messaging-sw.js')
-                .then(function(swReg) {
-                    console.log('Service Worker is registered', swReg);
+      function handlePermissionResult(permissionData) {
+          if (permissionData.permission === 'denied') {
+              console.warn('Push notifications permission denied');
+          } else if (permissionData.permission === 'granted') {
+              console.log('Push notifications permission granted');
+              const deviceToken = permissionData.deviceToken;
+              //const url = 'http://localhost:8080/register?token=' + encodeURIComponent(deviceToken) + '&user=shivangi';
+              //fetch(url, { method: 'post'});
+              console.log('APNS Device Token:', deviceToken);
+          }
+      }
 
-                    swRegistration = swReg;
-                    initializeUI();
-                })
-                .catch(function(error) {
-                    console.error('Service Worker Error', error);
-                });
-        })
-    }else {
-        console.warn('Push messaging is not supported');
-    }
+      // ***** initializeUI **** 
+      // Description -- 
+      // 
+      function initializeUI() {
+          // subscribeUser();
+          swRegistration.pushManager.getSubscription()
+              .then(function(subscription) {
+                  const isSubscribed = !(subscription === null);
+
+                  if (isSubscribed) {
+                      console.log('User IS subscribed.');
+                  } else {
+                      console.log('User is NOT subscribed.');
+                  }
+              });
+      }
+
+      // ***** Self calling functions **** 
+      // Description -- 
+      // 
+      (function() {
+          if ('safari' in window && 'pushNotification' in window.safari) {
+              console.log('Safari Push Notifications are supported');
+
+              // Wait for a user gesture to prompt for push notification permission
+              document.addEventListener('DOMContentLoaded', function() {
+                  const button = document.getElementById('subscribeButton'); // Replace with your button ID
+                  button.addEventListener('click', function() {
+                      window.safari.pushNotification.requestPermission(
+                          'https://shivangipatel225.github.io', // Your website URL
+                          'web.adobe.ans.test', // Your website Push ID
+                          {}, // Data to send with the permission request, if needed
+                          function(permissionData) {
+                              handlePermissionResult(permissionData);
+                          }
+                      );
+                  });
+              });
+          } else if ('serviceWorker' in navigator && 'PushManager' in window) {
+
+              console.log('Service Worker and Push are supported');
+              
+              navigator.serviceWorker.register('https://shivangipatel225.github.io/WebPushDemoShivangi/firebase-messaging-sw.js')
+                  .then(function(swReg) {
+                      firebase.initializeApp(firebaseConfig)
+                      const messagingObject = firebase.messaging();
+
+                      // Set VAPID key
+
+                      document.getElementById('runScript').addEventListener('click', function() {
+                          event.preventDefault();
+                          console.log("yes");
+                          const appId = document.getElementById('appId').value;
+                          const targetId = document.getElementById('targetId').value;
+                          const locale = document.getElementById('locale').value;
+                          const browserVersionMin = document.getElementById('browserVersionMin').value;
+                          const browserVersionMax = document.getElementById('browserVersionMax').value;
+                          const browserName = document.getElementById('browserName').value;
+
+                          const webPushInfo = {
+                              webPushId: webPushId,
+                              appId: appId,
+                              targetId: targetId,
+                              locale: locale,
+                              browserVersionMin: browserVersionMin,
+                              browserVersionMax: browserVersionMax,
+                              browserName: browserName
+                          };
+
+                          messagingObject.getToken({
+                              serviceWorkerRegistration: swReg,
+                              vapidKey: 'BO26-i1tjAniFCyS_XDhNv7sO_XM97Z48Qnj_dAVdqn8zKa3mh-54PYLdf0y1tGXwnzr2FrnGGGqeKNgnpbrjgI'
+                          }).then((currentToken) => {
+                              if (currentToken) {
+                                  console.log('Token:', currentToken);
+
+                                  webPushInfo.registrationToken = currentToken;
+                                  fetch('https://ans-team-ans-web-push-deploy-ethos501-stage-va6-k-ae8cf7.stage.cloud.adobe.io/subscription', {
+                                          method: 'POST',
+                                          headers: {
+                                              'Content-Type': 'application/json',
+                                              'x-api-key': document.getElementById('apiKey').value,
+                                              'Authorization': 'bearer ' + document.getElementById('token').value
+                                          },
+                                          body: JSON.stringify(webPushInfo)
+                                      })
+                                      .then(response => response.json())
+                                      .then(data => {
+                                          webPushId = data.webPushId;
+                                          const webPushIdLabel = document.getElementById('webPushIdLabel');
+                                          webPushIdLabel.textContent = `subscribed successfully with webPushId: ${data.webPushId}`;
+                                          webPushIdLabel.style.color = 'green';
+                                          console.log('Token:', data.registrationToken);
+                                          localStorage.setItem(data.appId, webPushId);
+                                          const registerButton = document.getElementById('runScript');
+                                          registerButton.style.display = 'none';
+                                          document.getElementById('unregisterButton').style.display = 'block';
+                                          $("#info").html("<tr><td style='word-wrap: break-word'> Token is : "+ data.registrationToken +" </td></tr>");
+
+                                      })
+                                      .catch((err) => {
+                                          console.log('An error occurred while retrieving token. ', err);
+                                          $("#info").html("<tr><td style='word-wrap: break-word'> An error occurred while retrieving token. </td></tr>");
+                                      });
+
+                              } else {
+                                  console.log('No registration token available. Request permission to generate one.');
+                                  $("#info").html("<tr><td style='word-wrap: break-word'> No registration token available. Request permission to generate one. </td></tr>");
+
+                              }
+                          }).catch((err) => {
+                              console.log('An error occurred while retrieving token. ', err);
+                              $("#info").html("<tr><td style='word-wrap: break-word'> An error occurred while retrieving token. "+ err+" </td></tr>");
+
+                          });
+
+                          console.log('Service Worker is registered', swReg);
+                          $("#info").html("<tr><td style='word-wrap: break-word'> Service Worker is registered. </td></tr>");
+
+                          swRegistration = swReg;
+                          initializeUI();
+                      })
+
+                      document.getElementById('unregisterButton').addEventListener('click', function() {
+                          event.preventDefault();
+                          const appId = document.getElementById('appId').value;
+                          const webPushIdFromLocalStorage = localStorage.getItem(appId);
+                          if (webPushIdFromLocalStorage) {
+                              fetch(`https://ans-team-ans-web-push-deploy-ethos501-stage-va6-k-ae8cf7.stage.cloud.adobe.io/subscription?subscriptionId=${webPushId}`, {
+                                      method: 'DELETE',
+                                      headers: {
+                                          'x-api-key': document.getElementById('apiKey').value,
+                                          'Authorization': 'bearer ' + document.getElementById('token').value
+                                      }
+                                  })
+                                  .then(response => response.text())
+                                  .then(data => {
+                                      const webPushIdLabel = document.getElementById('webPushIdLabel');
+                                      webPushIdLabel.textContent = `UNSUBSCRIBED webPushId: ${webPushIdFromLocalStorage}`;
+                                      webPushIdLabel.style.color = 'red';
+                                      console.log(data);
+                                      localStorage.removeItem(document.getElementById('appId').value);
+                                      $("#info").html("<tr><td style='word-wrap: break-word'> Unregistered subscription </td></tr>");
+                                      document.getElementById('unregisterButton').style.display = 'none';
+                                      document.getElementById('runScript').style.display = 'block';
+
+                                  })
+                                  .catch((error) => {
+                                      console.error('Error:', error);
+                                  });
+                          } else {
+                              console.log('No webPushId available for unregistration');
+                              document.getElementById('unregisterButton').style.display = 'none';
+                              document.getElementById('runScript').style.display = 'block';
+                              $("#info").html("<tr><td style='word-wrap: break-word'> No webPushId available for unregistration. </td></tr>");
+
+                          }
+                      });
+                  })
+                  .catch(function(error) {
+                      console.error('Service Worker Error', error);
+                      $("#info").html("<tr><td style='word-wrap: break-word'> Service Worker Error. </td></tr>");
+
+                  });
+              
+          } else {
+              console.warn('Push messaging is not supported');
+              $("#info").html("<tr><td style='word-wrap: break-word'> Push messaging is not supported. </td></tr>");
+
+          }
+
+      })();
 
 
-    function initializeUI() {
+  </script>
 
-        // Initialize Firebase
-        firebase.initializeApp(firebaseConfig)
-        const messagingObject = firebase.messaging();
-
-        // Set VAPID key
-        messagingObject.getToken({ vapidKey: 'BEmAVlZuKUS6BKpeU4PZg9XFsihcXgfg_4l2MC-9l2El79yKlSlc2RhL1WKEiKwaB8_3JORdF4WL25fC-5M4v1k' }).then((currentToken) => {
-            if (currentToken) {
-
-                console.log('Token:', currentToken);
-            } else {
-                console.log('No registration token available. Request permission to generate one.');
-            }
-        }).catch((err) => {
-            console.log('An error occurred while retrieving token. ', err);
-        });
-
-        // subscribeUser();
-
-        swRegistration.pushManager.getSubscription()
-            .then(function(subscription) {
-                const isSubscribed = !(subscription === null);
-
-                if (isSubscribed) {
-                    console.log('User IS subscribed.');
-                } else {
-                    console.log('User is NOT subscribed.');
-                }
-            });
-    }
-
-
-</script>
-<!--<script src="firebase-service-worker.js"></script>-->
 </body>
 </html>
