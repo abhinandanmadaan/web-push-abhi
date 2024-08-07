@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Web push notifications Test(Safari).</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+    <style>
+    .bd-example {
+        border-color: rgb(222, 226, 230);
+        border-style : solid;
+        border-width: 1px;
+        padding: 5px 15px 5px 15px;
+        width: 60%;
+        margin-bottom: 10px;
+    }
+    .h3, h3 {
+        margin-top: 5px;
+        margin-bottom: 5px;
+    }
+    .form-text{
+      text-align: end;
+      color: grey;
+    }
+    .form-label{
+      font-weight: normal;
+    }
+  </style>
+</head>
+
+<body>
+<div class="container">
+    <h3>Demo for Web push notifications(Safari)</h3>
+    <br/><br/>
+    <div class="bd-example" id="div1">
+        <form action="#">
+            <div class="form-group">
+                <label for="appId" class="form-label">Enter ANS AppId</label>
+                <input type="text" id="appId" class="form-control" aria-describedby="appIdHelpBlock" placeholder="Enter ANS AppId" value="WebPushTestApp">
+            </div>
+            <div class="form-group">
+                <label for="targetId" class="form-label">Enter IMS user Id (Anonymous users are not supported) </label>
+                <input type="text" id="targetId" class="form-control" aria-describedby="targetIdHelpBlock" placeholder="Enter logged in user's adobe ID" value="default">
+            </div>
+            <div class="form-group">
+                <label for="locale" class="form-label">Enter Locale</label>
+                <input type="text" id="locale" class="form-control" aria-describedby="localeHelpBlock" placeholder="Enter locale" value="en_US">
+            </div>
+            <div class="form-group">
+                <label for="browserVersionMin" class="form-label">Enter min browser version</label>
+                <input type="text" id="browserVersionMin" class="form-control" aria-describedby="browserVersionMinHelpBlock" placeholder="Enter Browser version min" value="1">
+            </div>
+            <div class="form-group">
+                <label for="browserVersionMax" class="form-label">Enter max browser version</label>
+                <input type="text" id="browserVersionMax" class="form-control" aria-describedby="browserVersionMaxHelpBlock" placeholder="Enter Browser version max" value="10">
+            </div>
+            <div class="form-group">
+                <label for="browserName" class="form-label">Enter Browser name - (Chrome, Safari, Edge, Firefox) </label>
+                <input type="text" id="browserName" class="form-control" aria-describedby="browserNameHelpBlock" placeholder="Enter Browser Name" value="Safari">
+            </div>
+            <div class="form-group">
+                <label for="token" class="form-label">Enter Authorization token</label>
+                <input type="password" id="token" class="form-control" aria-describedby="tokenHelpBlock" placeholder="Enter IMS User token" value="default">
+            </div>
+            <div class="form-group">
+                <label for="apiKey" class="form-label">Enter IMS API key</label>
+                <input type="text" id="apiKey" class="form-control" aria-describedby="apiKeyHelpBlock" placeholder="Enter ANS API key" value="ANS1">
+            </div>
+            <button type="submit" id="subscribeButton" class="btn btn-default">Subscribe</button>
+        </form>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <label id="webPushIdLabel" style="background-color: yellow;"></label>
+            <table id="conversation" class="table table-striped">
+                <thead>
+                <tr>
+                    <th>Info!!</th>
+                </tr>
+                </thead>
+                <tbody id="info">
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    window.onload = function() {
+      if ('safari' in window && 'pushNotification' in window.safari) {
+        console.log('Safari Push Notifications are supported');
+        document.getElementById('subscribeButton').addEventListener('click', function(event) {
+          event.preventDefault();
+          window.safari.pushNotification.requestPermission(
+            'https://abhinandanmadaan.github.io/web-push-abhi/package',
+            'web.adobe.ans.test',
+            { userId: document.getElementById('targetId').value }, // Data to send with the permission request, if needed
+            function(permissionData) {
+              console.log('permissionData: ', permissionData);
+              if (permissionData.permission === 'denied') {
+                console.warn('Push notifications permission denied');
+                $("#info").html("<tr><td style='word-wrap: break-word'> Push notifications permission denied. </td></tr>");
+              } else if (permissionData.permission === 'granted') {
+                console.log('Push notifications permission granted');
+                const deviceToken = permissionData.deviceToken;
+                console.log('APNS Device Token:', deviceToken);
+                $("#info").html("<tr><td style='word-wrap: break-word'> APNS Device Token: "+ deviceToken +" </td></tr>");
+              }
+            }
+          );
+        });
+      } else {
+        console.warn('Safari Push Notifications are not supported');
+        $("#info").html("<tr><td style='word-wrap: break-word'> Safari Push Notifications are not supported. </td></tr>");
+      }
+    };
+  </script>
+</body>
+</html>
