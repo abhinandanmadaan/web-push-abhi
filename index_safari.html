@@ -34,7 +34,7 @@
 
 <body>
 <div class="container">
-    <h3>Demo for Web push notifications(Safari)</h3>
+    <h3>Demo for Web push notifications with Acrobat web (Safari)</h3>
     <br/><br/>
     <div class="bd-example" id="div1">
         <form action="#">
@@ -95,10 +95,30 @@
         console.log('Safari Push Notifications are supported');
         document.getElementById('subscribeButton').addEventListener('click', function(event) {
           event.preventDefault();
+
+          const appId = document.getElementById('appId').value;
+          const targetId = document.getElementById('targetId').value;
+          const locale = document.getElementById('locale').value;
+          const browserVersionMin = document.getElementById('browserVersionMin').value;
+          const browserVersionMax = document.getElementById('browserVersionMax').value;
+          const browserName = document.getElementById('browserName').value;
+          const apiKey = document.getElementById('apiKey').value;
+          const token = document.getElementById('token').value;
+
+          const webPushInfo = {
+            appId: appId,
+            targetId: targetId,
+            locale: locale,
+            browserVersionMin: browserVersionMin,
+            browserVersionMax: browserVersionMax,
+            browserName: browserName
+          };
+
+
           window.safari.pushNotification.requestPermission(
             'https://ans-team-ans-web-push-deploy-ethos501-stage-va6-k-ae8cf7.stage.cloud.adobe.io',
             'web.adobe.ans.test',
-            { userId: document.getElementById('targetId').value }, // Data to send with the permission request, if needed
+            { userId: targetId }, // Data to send with the permission request, if needed
             function(permissionData) {
               console.log('permissionData: ', permissionData);
               if (permissionData.permission === 'denied') {
@@ -108,6 +128,24 @@
                 console.log('Push notifications permission granted');
                 const deviceToken = permissionData.deviceToken;
                 console.log('APNS Device Token:', deviceToken);
+
+                webPushInfo.registrationToken = deviceToken;
+
+                fetch('https://ans-team-ans-web-push-deploy-ethos501-stage-va6-k-ae8cf7.stage.cloud.adobe.io/subscription', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'x-api-key': apiKey,
+                    'Authorization': 'bearer ' + token
+                  },
+                  body: JSON.stringify(webPushInfo)
+                })
+                .then(response => response.json())
+                .then(data => {
+                  const webPushIdLabel = document.getElementById('webPushIdLabel');
+                  webPushIdLabel.textContent = `Subscribed successfully with webPushId: ${data.webPushId}`;
+                  webPushIdLabel.style.color = 'green';
+                  localStorage.setItem(appId, data.webPushId);
                 $("#info").html("<tr><td style='word-wrap: break-word'> APNS Device Token: "+ deviceToken +" </td></tr>");
               }
             }
