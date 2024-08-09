@@ -34,7 +34,7 @@
 
 <body>
 <div class="container">
-    <h3>Demo for Web push notifications(Safari)</h3>
+    <h3>Demo for Web push notifications with Acrobat web (Safari)</h3>
     <br/><br/>
     <div class="bd-example" id="div1">
         <form action="#">
@@ -146,7 +146,12 @@
                   webPushIdLabel.textContent = `Subscribed successfully with webPushId: ${data.webPushId}`;
                   webPushIdLabel.style.color = 'green';
                   localStorage.setItem(appId, data.webPushId);
-                $("#info").html("<tr><td style='word-wrap: break-word'> APNS Device Token: "+ deviceToken +" </td></tr>");
+                  $("#info").html("<tr><td style='word-wrap: break-word'> Token is : "+ data.registrationToken +" </td></tr>");
+                })
+                .catch((err) => {
+                  console.log('An error occurred while retrieving token. ', err);
+                  $("#info").html("<tr><td style='word-wrap: break-word'> An error occurred while retrieving token. </td></tr>");
+                });
               }
             }
           );
