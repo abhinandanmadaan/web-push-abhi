@@ -7,347 +7,212 @@
 
   <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js" type="module"></script>
   <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-messaging-compat.js" type="module"></script>
-  <script src="firebase-messaging-sw.js"></script>  
+  <script src="firebase-messaging-sw.js"></script>
 
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
 
-  
-
   <style>
-        
-        .bd-example {
-            border-color: rgb(222, 226, 230);
-            border-style : solid;
-            border-width: 1px;
-            padding: 5px 15px 5px 15px;
-            width: 60%;
-            margin-bottom: 10px;
-        }
-        .h3, h3 {
-            margin-top: 5px;
-            margin-bottom: 5px;
-        }
-        .form-text{
-          text-align: end;
-          color: grey;
-        }
-
-        .form-label{
-          font-weight: normal;
-        }
-    </style>
-
+    .bd-example {
+        border-color: rgb(222, 226, 230);
+        border-style : solid;
+        border-width: 1px;
+        padding: 5px 15px 5px 15px;
+        width: 60%;
+        margin-bottom: 10px;
+    }
+    .h3, h3 {
+        margin-top: 5px;
+        margin-bottom: 5px;
+    }
+    .form-text{
+      text-align: end;
+      color: grey;
+    }
+    .form-label{
+      font-weight: normal;
+    }
+    .info-bar {
+      background-color: #f8f9fa;
+      border-bottom: 1px solid #e9ecef;
+      padding: 10px;
+      text-align: center;
+      position: fixed;
+      top: 0;
+      width: 100%;
+      z-index: 1000;
+    }
+    .info-bar button {
+      margin-left: 10px;
+    }
+  </style>
 </head>
 
 <body>
-
-  <!-- 
-    *****************
-    ALL HTML Blocks 
-    ***************** 
-  --->
-
-  <div class="container">
-    <h3>Demo for Web push notifications with Acrobat web</h3>
-    <br/><br/>
-    <div class="bd-example" id="div1">
-
-      <form action="#">
-        <div class="form-group">
-          <label for="appId" class="form-label">Enter ANS AppId</label>
-          <input type="text" id="appId" class="form-control" aria-describedby="appIdHelpBlock" placeholder="Enter ANS AppId" value="webPushTestApp2">
-          
-        </div>
-
-        <div class="form-group">
-          <label for="targetId" class="form-label">Enter IMS user Id (Anonymous users are not supported) </label>
-          <input type="text" id="targetId" class="form-control" aria-describedby="targetIdHelpBlock" placeholder="Enter logged in user's adobe ID" value="default">
-          
-        </div>
-
-        <div class="form-group">
-          <label for="locale" class="form-label">Enter Locale</label>
-          <input type="text" id="locale" class="form-control" aria-describedby="localeHelpBlock" placeholder="Enter locale" value="en_US">
-          
-        </div>
-
-        <div class="form-group">
-          <label for="browserVersionMin" class="form-label">Enter min browser version</label>
-          <input type="text" id="browserVersionMin" class="form-control" aria-describedby="browserVersionMinHelpBlock" placeholder="Enter Browser version min" value="1">
-          
-        </div>
-
-        <div class="form-group">
-          <label for="browserVersionMax" class="form-label">Enter max browser version</label>
-          <input type="text" id="browserVersionMax" class="form-control" aria-describedby="browserVersionMaxHelpBlock" placeholder="Enter Browser version max" value="10">
-          
-        </div>
-
-        <div class="form-group">
-          <label for="browserName" class="form-label">Enter Browser name - (Chrome, Safari, Edge, Firefox) </label>
-          <input type="text" id="browserName" class="form-control" aria-describedby="browserNameHelpBlock" placeholder="Enter Browser Name" value="Chrome">
-          
-        </div>
-
-        <div class="form-group">
-          <label for="token" class="form-label">Enter Authorization token</label>
-          <input type="password" id="token" class="form-control" aria-describedby="tokenHelpBlock" placeholder="Enter IMS User token" value="default">
-          
-        </div>
-
-        <div class="form-group">
-          <label for="apiKey" class="form-label">Enter IMS API key</label>
-          <input type="text" id="apiKey" class="form-control" aria-describedby="apiKeyHelpBlock" placeholder="Enter ANS API key" value="ANS1">
-         
-        </div>
-
-        <button type="submit" id="runScript" class="btn btn-default">Register</button>
-        <button type="submit" id="unregisterButton" class="btn btn-default">Unregister</button>
-
-      </form>
-    </div> <!-- end of  div1 -->
-    <div class="row">
-        <div class="col-md-12">
-          <label id="webPushIdLabel" style="background-color: yellow;"></label>
-            <table id="conversation" class="table table-striped">
-                <thead>
-                <tr>
-                    <th>Info!!</th>
-                </tr>
-                </thead>
-                <tbody id="info">
-                </tbody>
-            </table>
-        </div>
-    </div>
+<div class="info-bar" id="infoBar">
+  <span>Allow notifications to stay updated.</span>
+  <button id="allowNotifications" class="btn btn-primary">Allow Notifications</button>
+  <button id="closeInfoBar" class="btn btn-secondary">✕</button>
 </div>
+
+<div class="container" style="margin-top: 60px;">
+  <h3>Demo for Web push notifications with Acrobat web</h3>
+  <br/><br/>
+  <div class="row">
+    <div class="col-md-12">
+      <label id="webPushIdLabel" style="background-color: yellow;"></label>
+      <table id="conversation" class="table table-striped">
+        <thead>
+        <tr>
+          <th>Info!!</th>
+        </tr>
+        </thead>
+        <tbody id="info">
+        </tbody>
+      </table>
+    </div>
   </div>
+</div>
 
-  <!-- 
-    *****************
-    ALL Java scripts 
-    ***************** 
-  --->
-  <script type="module">
-    
+<script type="module">
     window.onload = function() {
-      const wpId = localStorage.getItem(document.getElementById('appId').value);
-      const registerButton = document.getElementById('runScript');
-      const unregisterButton = document.getElementById('unregisterButton');
+      const appId = localStorage.getItem('appId') || 'WebPushTestApp';
+      const targetId = localStorage.getItem('targetId') || 'default';
+      const locale = localStorage.getItem('locale') || 'en_US';
+      const browserVersionMin = '1';
+      const browserVersionMax = '10';
+      const browserName = localStorage.getItem('browserName') || 'Chrome';
+      const imsToken = localStorage.getItem('imsToken') || 'fake auth token';
+      const apiKey = 'ANS1';
 
-          if (wpId) {
-              registerButton.style.display = 'none';
-              $("#info").html(`<tr><td style='word-wrap: break-word'> A subscription already exists for the given appId. The subcscription ID is: ${wpId} </td></tr>`);
-          } else {
-              unregisterButton.style.display = 'none';
-          }
-    };
-      let swRegistration = null;
-      let webPushId = null;
+      const wpId = localStorage.getItem(appId);
+      const infoBar = document.getElementById('infoBar');
+      const allowNotificationsButton = document.getElementById('allowNotifications');
+      const closeInfoBarButton = document.getElementById('closeInfoBar');
+
+      if (wpId) {
+        infoBar.style.display = 'none';
+        $("#info").html(`<tr><td style='word-wrap: break-word'> A subscription already exists for the given appId. The subscription ID is: ${wpId} </td></tr>`);
+      }
+
+      closeInfoBarButton.addEventListener('click', function() {
+        infoBar.style.display = 'none';
+      });
 
       const firebaseConfig = {
-          apiKey: "AIzaSyChFMxkFE_9lPmGK9DIfWjtxy5yoAXj3kI",
-          authDomain: "web-push-ab.firebaseapp.com",
-          projectId: "web-push-ab",
-          storageBucket: "web-push-ab.appspot.com",
-          messagingSenderId: "409514500235",
-          appId: "1:409514500235:web:2ff7afada70f180c29348e",
-          measurementId: "G-VEBKWVRSB1"
+          apiKey: "AIzaSyBQhnlhociHucGdwk5lkqy0gXruyELekAI",
+          authDomain: "web-push-demo-99815.firebaseapp.com",
+          projectId: "web-push-demo-99815",
+          storageBucket: "web-push-demo-99815.appspot.com",
+          messagingSenderId: "1059431989933",
+          appId: "1:1059431989933:web:842fc48d3f73bb89203c24",
+          measurementId: "G-22L57Q8N5Q"
       };
-      
-      /// ***** handlePermissionResult **** 
-      // Description -- 
-      // 
 
-      function handlePermissionResult(permissionData) {
-          if (permissionData.permission === 'denied') {
-              console.warn('Push notifications permission denied');
-          } else if (permissionData.permission === 'granted') {
-              console.log('Push notifications permission granted');
-              const deviceToken = permissionData.deviceToken;
-              //const url = 'http://localhost:8080/register?token=' + encodeURIComponent(deviceToken) + '&user=shivangi';
-              //fetch(url, { method: 'post'});
-              console.log('APNS Device Token:', deviceToken);
-          }
-      }
+      allowNotificationsButton.addEventListener('click', function(event) {
+        event.preventDefault();
 
-      // ***** initializeUI **** 
-      // Description -- 
-      // 
-      function initializeUI() {
-          // subscribeUser();
-          swRegistration.pushManager.getSubscription()
-              .then(function(subscription) {
-                  const isSubscribed = !(subscription === null);
+        const webPushInfo = {
+          appId: appId,
+          targetId: targetId,
+          locale: locale,
+          browserVersionMin: browserVersionMin,
+          browserVersionMax: browserVersionMax,
+          browserName: browserName
+        };
 
-                  if (isSubscribed) {
-                      console.log('User IS subscribed.');
-                  } else {
-                      console.log('User is NOT subscribed.');
-                  }
-              });
-      }
+        if ('safari' in window && 'pushNotification' in window.safari) {
+          window.safari.pushNotification.requestPermission(
+            'https://ans-team-ans-web-push-deploy-ethos501-stage-va6-k-ae8cf7.stage.cloud.adobe.io',
+            'web.adobe.ans.test',
+            { userId: targetId },
+            function(permissionData) {
+              if (permissionData.permission === 'denied') {
+                console.warn('Push notifications permission denied');
+                $("#info").html("<tr><td style='word-wrap: break-word'> Push notifications permission denied. </td></tr>");
+              } else if (permissionData.permission === 'granted') {
+                infoBar.style.display = 'none';
+                const deviceToken = permissionData.deviceToken;
+                webPushInfo.registrationToken = deviceToken;
 
-      // ***** Self calling functions **** 
-      // Description -- 
-      // 
-      (function() {
-          if ('safari' in window && 'pushNotification' in window.safari) {
-              console.log('Safari Push Notifications are supported');
+                fetch('https://ans-team-ans-web-push-deploy-ethos501-stage-va6-k-ae8cf7.stage.cloud.adobe.io/subscription', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'x-api-key': apiKey,
+                    'Authorization': 'bearer ' + imsToken
+                  },
+                  body: JSON.stringify(webPushInfo)
+                })
+                .then(response => response.json())
+                .then(data => {
+                  const webPushIdLabel = document.getElementById('webPushIdLabel');
+                  webPushIdLabel.textContent = `Subscribed successfully with webPushId: ${data.webPushId}`;
+                  webPushIdLabel.style.color = 'green';
+                  localStorage.setItem(appId, data.webPushId);
+                  $("#info").html("<tr><td style='word-wrap: break-word'> Token is : "+ data.registrationToken +" </td></tr>");
+                })
+                .catch((err) => {
+                  console.log('An error occurred while retrieving token. ', err);
+                  $("#info").html("<tr><td style='word-wrap: break-word'> An error occurred while retrieving token. </td></tr>");
+                });
+              }
+            }
+          );
+        } else if ('serviceWorker' in navigator && 'PushManager' in window) {
+          navigator.serviceWorker.register('firebase-messaging-sw.js')
+            .then(function(swReg) {
+              firebase.initializeApp(firebaseConfig);
+              const messagingObject = firebase.messaging();
 
-              // Wait for a user gesture to prompt for push notification permission
-              document.addEventListener('DOMContentLoaded', function() {
-                  const button = document.getElementById('subscribeButton'); // Replace with your button ID
-                  button.addEventListener('click', function() {
-                      window.safari.pushNotification.requestPermission(
-                          'https://abhinandanmadaan.github.io', // Your website URL
-                          'web.adobe.ans.test', // Your website Push ID
-                          {}, // Data to send with the permission request, if needed
-                          function(permissionData) {
-                              handlePermissionResult(permissionData);
-                          }
-                      );
-                  });
-              });
-          } else if ('serviceWorker' in navigator && 'PushManager' in window) {
-
-              console.log('Service Worker and Push are supported');
-              
-              navigator.serviceWorker.register('https://abhinandanmadaan.github.io/web-push-abhi/firebase-messaging-sw.js')
-                  .then(function(swReg) {
-                      firebase.initializeApp(firebaseConfig)
-                      const messagingObject = firebase.messaging();
-
-                      // Set VAPID key
-
-                      document.getElementById('runScript').addEventListener('click', function() {
-                          event.preventDefault();
-                          console.log("yes");
-                          const appId = document.getElementById('appId').value;
-                          const targetId = document.getElementById('targetId').value;
-                          const locale = document.getElementById('locale').value;
-                          const browserVersionMin = document.getElementById('browserVersionMin').value;
-                          const browserVersionMax = document.getElementById('browserVersionMax').value;
-                          const browserName = document.getElementById('browserName').value;
-
-                          const webPushInfo = {
-                              webPushId: webPushId,
-                              appId: appId,
-                              targetId: targetId,
-                              locale: locale,
-                              browserVersionMin: browserVersionMin,
-                              browserVersionMax: browserVersionMax,
-                              browserName: browserName
-                          };
-
-                          messagingObject.getToken({
-                              serviceWorkerRegistration: swReg,
-                              vapidKey: 'BO26-i1tjAniFCyS_XDhNv7sO_XM97Z48Qnj_dAVdqn8zKa3mh-54PYLdf0y1tGXwnzr2FrnGGGqeKNgnpbrjgI'
-                          }).then((currentToken) => {
-                              if (currentToken) {
-                                  console.log('Token:', currentToken);
-
-                                  webPushInfo.registrationToken = currentToken;
-                                  fetch('https://ans-team-ans-web-push-deploy-ethos501-stage-va6-k-ae8cf7.stage.cloud.adobe.io/subscription', {
-                                          method: 'POST',
-                                          headers: {
-                                              'Content-Type': 'application/json',
-                                              'x-api-key': document.getElementById('apiKey').value,
-                                              'Authorization': 'bearer ' + document.getElementById('token').value
-                                          },
-                                          body: JSON.stringify(webPushInfo)
-                                      })
-                                      .then(response => response.json())
-                                      .then(data => {
-                                          webPushId = data.webPushId;
-                                          const webPushIdLabel = document.getElementById('webPushIdLabel');
-                                          webPushIdLabel.textContent = `subscribed successfully with webPushId: ${data.webPushId}`;
-                                          webPushIdLabel.style.color = 'green';
-                                          console.log('Token:', data.registrationToken);
-                                          localStorage.setItem(data.appId, webPushId);
-                                          const registerButton = document.getElementById('runScript');
-                                          registerButton.style.display = 'none';
-                                          document.getElementById('unregisterButton').style.display = 'block';
-                                          $("#info").html("<tr><td style='word-wrap: break-word'> Token is : "+ data.registrationToken +" </td></tr>");
-
-                                      })
-                                      .catch((err) => {
-                                          console.log('An error occurred while retrieving token. ', err);
-                                          $("#info").html("<tr><td style='word-wrap: break-word'> An error occurred while retrieving token. </td></tr>");
-                                      });
-
-                              } else {
-                                  console.log('No registration token available. Request permission to generate one.');
-                                  $("#info").html("<tr><td style='word-wrap: break-word'> No registration token available. Request permission to generate one. </td></tr>");
-
-                              }
-                          }).catch((err) => {
-                              console.log('An error occurred while retrieving token. ', err);
-                              $("#info").html("<tr><td style='word-wrap: break-word'> An error occurred while retrieving token. "+ err+" </td></tr>");
-
-                          });
-
-                          console.log('Service Worker is registered', swReg);
-                          $("#info").html("<tr><td style='word-wrap: break-word'> Service Worker is registered. </td></tr>");
-
-                          swRegistration = swReg;
-                          initializeUI();
-                      })
-
-                      document.getElementById('unregisterButton').addEventListener('click', function() {
-                          event.preventDefault();
-                          const appId = document.getElementById('appId').value;
-                          const webPushIdFromLocalStorage = localStorage.getItem(appId);
-                          if (webPushIdFromLocalStorage) {
-                              fetch(`https://ans-team-ans-web-push-deploy-ethos501-stage-va6-k-ae8cf7.stage.cloud.adobe.io/subscription?subscriptionId=${webPushId}`, {
-                                      method: 'DELETE',
-                                      headers: {
-                                          'x-api-key': document.getElementById('apiKey').value,
-                                          'Authorization': 'bearer ' + document.getElementById('token').value
-                                      }
-                                  })
-                                  .then(response => response.text())
-                                  .then(data => {
-                                      const webPushIdLabel = document.getElementById('webPushIdLabel');
-                                      webPushIdLabel.textContent = `UNSUBSCRIBED webPushId: ${webPushIdFromLocalStorage}`;
-                                      webPushIdLabel.style.color = 'red';
-                                      console.log(data);
-                                      localStorage.removeItem(document.getElementById('appId').value);
-                                      $("#info").html("<tr><td style='word-wrap: break-word'> Unregistered subscription </td></tr>");
-                                      document.getElementById('unregisterButton').style.display = 'none';
-                                      document.getElementById('runScript').style.display = 'block';
-
-                                  })
-                                  .catch((error) => {
-                                      console.error('Error:', error);
-                                  });
-                          } else {
-                              console.log('No webPushId available for unregistration');
-                              document.getElementById('unregisterButton').style.display = 'none';
-                              document.getElementById('runScript').style.display = 'block';
-                              $("#info").html("<tr><td style='word-wrap: break-word'> No webPushId available for unregistration. </td></tr>");
-
-                          }
-                      });
+              messagingObject.getToken({
+                serviceWorkerRegistration: swReg,
+                vapidKey: 'BEmAVlZuKUS6BKpeU4PZg9XFsihcXgfg_4l2MC-9l2El79yKlSlc2RhL1WKEiKwaB8_3JORdF4WL25fC-5M4v1k'
+              }).then((currentToken) => {
+                if (currentToken) {
+                  infoBar.style.display = 'none';
+                  webPushInfo.registrationToken = currentToken;
+                  fetch('https://ans-team-ans-web-push-deploy-ethos501-stage-va6-k-ae8cf7.stage.cloud.adobe.io/subscription', {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                      'x-api-key': apiKey,
+                      'Authorization': 'bearer ' + imsToken
+                    },
+                    body: JSON.stringify(webPushInfo)
                   })
-                  .catch(function(error) {
-                      console.error('Service Worker Error', error);
-                      $("#info").html("<tr><td style='word-wrap: break-word'> Service Worker Error. </td></tr>");
-
+                  .then(response => response.json())
+                  .then(data => {
+                    const webPushIdLabel = document.getElementById('webPushIdLabel');
+                    webPushIdLabel.textContent = `Subscribed successfully with webPushId: ${data.webPushId}`;
+                    webPushIdLabel.style.color = 'green';
+                    localStorage.setItem(appId, data.webPushId);
+                    $("#info").html("<tr><td style='word-wrap: break-word'> Token is : "+ data.registrationToken +" </td></tr>");
+                  })
+                  .catch((err) => {
+                    console.log('An error occurred while retrieving token. ', err);
+                    $("#info").html("<tr><td style='word-wrap: break-word'> An error occurred while retrieving token. </td></tr>");
                   });
-              
-          } else {
-              console.warn('Push messaging is not supported');
-              $("#info").html("<tr><td style='word-wrap: break-word'> Push messaging is not supported. </td></tr>");
-
-          }
-
-      })();
-
-
+                } else {
+                  console.log('No registration token available. Request permission to generate one.');
+                  $("#info").html("<tr><td style='word-wrap: break-word'> No registration token available. Request permission to generate one. </td></tr>");
+                }
+              }).catch((err) => {
+                console.log('An error occurred while retrieving token. ', err);
+                $("#info").html("<tr><td style='word-wrap: break-word'> An error occurred while retrieving token. "+ err +" </td></tr>");
+              });
+            })
+            .catch(function(error) {
+              console.error('Service Worker Error', error);
+              $("#info").html("<tr><td style='word-wrap: break-word'> Service Worker Error. </td></tr>");
+            });
+        } else {
+          console.warn('Push messaging is not supported');
+          $("#info").html("<tr><td style='word-wrap: break-word'> Push messaging is not supported. </td></tr>");
+        }
+      });
+    };
   </script>
-
 </body>
 </html>
