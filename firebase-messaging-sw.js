@@ -6,9 +6,17 @@ self.addEventListener('push', function(event) {
     const pushData = event.data.json(); // Parse the data from the push event as JSON
 
     const title = pushData.notification.title;
+    
     const options = {
         body: pushData.notification.body,
-        actions: pushData.notification.actions,
+        actions: [
+            {
+              action: 'reply',
+              type: 'text',
+              title: 'Reply',
+              icon: pushData.notification.icon,
+            }
+          ],        
         icon: pushData.notification.icon,
         badge: pushData.notification.badge,
         image: pushData.notification.image,
