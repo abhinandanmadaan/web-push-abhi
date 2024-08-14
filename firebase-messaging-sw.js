@@ -10,13 +10,9 @@ self.addEventListener('push', function(event) {
     const options = {
         body: pushData.notification.body,
         actions: [
-            {
-              action: 'reply',
-              type: 'text',
-              title: 'Reply',
-              icon: pushData.notification.icon,
-            }
-          ],        
+            {action: 'like', title: 'Like'},
+            {action: 'reply', title: 'Reply'}
+        ],      
         icon: pushData.notification.icon,
         badge: pushData.notification.badge,
         image: pushData.notification.image,
