@@ -25,6 +25,8 @@
     .h3, h3 {
         margin-top: 5px;
         margin-bottom: 5px;
+        text-align: center;
+        color: white;
     }
     .form-text{
       text-align: end;
@@ -34,17 +36,37 @@
       font-weight: normal;
     }
     .info-bar {
-      background-color: #f8f9fa;
       border-bottom: 1px solid #e9ecef;
-      padding: 10px;
+      padding: 5px;
       text-align: center;
       position: fixed;
       top: 0;
       width: 100%;
       z-index: 1000;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      font-size: 15px;
+      background: #ffffff;
     }
     .info-bar button {
       margin-left: 10px;
+    }
+    .alert {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1050;
+      display: none;
+      width: 80%;
+    }
+    .background-image {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: -1;
     }
   </style>
 </head>
@@ -56,23 +78,12 @@
   <button id="closeInfoBar" class="btn btn-secondary">✕</button>
 </div>
 
+<img src="./adobe_logo.png" alt="Background Image" class="background-image">
+
 <div class="container" style="margin-top: 60px;">
-  <h3>Demo for Web push notifications with Acrobat web</h3>
+  <div class="alert alert-success" id="successAlert" role="alert"></div>
+  <h3>Demo for Web push notifications</h3>
   <br/><br/>
-  <div class="row">
-    <div class="col-md-12">
-      <label id="webPushIdLabel" style="background-color: yellow;"></label>
-      <table id="conversation" class="table table-striped">
-        <thead>
-        <tr>
-          <th>Info!!</th>
-        </tr>
-        </thead>
-        <tbody id="info">
-        </tbody>
-      </table>
-    </div>
-  </div>
 </div>
 
 <script type="module">
@@ -93,7 +104,7 @@
 
       if (wpId) {
         infoBar.style.display = 'none';
-        $("#info").html(`<tr><td style='word-wrap: break-word'> A subscription already exists for the given appId. The subscription ID is: ${wpId} </td></tr>`);
+        console.log(`A subscription already exists for the given appId. The subscription ID is: ${wpId}`);
       }
 
       closeInfoBarButton.addEventListener('click', function() {
@@ -109,6 +120,28 @@
           appId: "1:1059431989933:web:842fc48d3f73bb89203c24",
           measurementId: "G-22L57Q8N5Q"
       };
+
+      function showSuccessAlert(message) {
+        const successAlert = document.getElementById('successAlert');
+        successAlert.textContent = message;
+        successAlert.style.display = 'block';
+        setTimeout(() => {
+          successAlert.style.display = 'none';
+        }, 3000);
+      }
+
+      function showErrorAlert(message) {
+        const successAlert = document.getElementById('successAlert');
+        successAlert.classList.remove('alert-success');
+        successAlert.classList.add('alert-danger');
+        successAlert.textContent = message;
+        successAlert.style.display = 'block';
+        setTimeout(() => {
+          successAlert.style.display = 'none';
+          successAlert.classList.remove('alert-danger');
+          successAlert.classList.add('alert-success');
+        }, 3000);
+      }
 
       allowNotificationsButton.addEventListener('click', function(event) {
         event.preventDefault();
@@ -130,7 +163,6 @@
             function(permissionData) {
               if (permissionData.permission === 'denied') {
                 console.warn('Push notifications permission denied');
-                $("#info").html("<tr><td style='word-wrap: break-word'> Push notifications permission denied. </td></tr>");
               } else if (permissionData.permission === 'granted') {
                 infoBar.style.display = 'none';
                 const deviceToken = permissionData.deviceToken;
@@ -145,17 +177,22 @@
                   },
                   body: JSON.stringify(webPushInfo)
                 })
-                .then(response => response.json())
+                .then(response => {
+                  if (response.ok) {
+                    return response.json();
+                  } else {
+                    throw new Error('Network response was not ok');
+                  }
+                })
                 .then(data => {
-                  const webPushIdLabel = document.getElementById('webPushIdLabel');
-                  webPushIdLabel.textContent = `Subscribed successfully with webPushId: ${data.webPushId}`;
-                  webPushIdLabel.style.color = 'green';
+                  showSuccessAlert(`Congratulations you're subscribed to web push notifications!!`);
+                  console.log(`Congratulations you're subscribed to web push notifications with webPushId: ${data.webPushId}`);
                   localStorage.setItem(appId, data.webPushId);
-                  $("#info").html("<tr><td style='word-wrap: break-word'> Token is : "+ data.registrationToken +" </td></tr>");
+                  console.log(`Token is: ${data.registrationToken}`);
                 })
                 .catch((err) => {
                   console.log('An error occurred while retrieving token. ', err);
-                  $("#info").html("<tr><td style='word-wrap: break-word'> An error occurred while retrieving token. </td></tr>");
+                  showErrorAlert('An error occurred while subscribing to web push notifications.');
                 });
               }
             }
@@ -182,34 +219,35 @@
                     },
                     body: JSON.stringify(webPushInfo)
                   })
-                  .then(response => response.json())
+                  .then(response => {
+                    if (response.ok) {
+                      return response.json();
+                    } else {
+                      throw new Error('Network response was not ok');
+                    }
+                  })
                   .then(data => {
-                    const webPushIdLabel = document.getElementById('webPushIdLabel');
-                    webPushIdLabel.textContent = `Subscribed successfully with webPushId: ${data.webPushId}`;
-                    webPushIdLabel.style.color = 'green';
+                    showSuccessAlert(`Congratulations you're subscribed to web push notifications!!`);
+                    console.log(`Congratulations you're subscribed to web push notifications with webPushId: ${data.webPushId}`);
                     localStorage.setItem(appId, data.webPushId);
-                    $("#info").html("<tr><td style='word-wrap: break-word'> Token is : "+ data.registrationToken +" </td></tr>");
+                    console.log(`Token is: ${data.registrationToken}`);
                   })
                   .catch((err) => {
                     console.log('An error occurred while retrieving token. ', err);
-                    $("#info").html("<tr><td style='word-wrap: break-word'> An error occurred while retrieving token. </td></tr>");
+                    showErrorAlert('An error occurred while subscribing to web push notifications.');
                   });
                 } else {
                   console.log('No registration token available. Request permission to generate one.');
-                  $("#info").html("<tr><td style='word-wrap: break-word'> No registration token available. Request permission to generate one. </td></tr>");
                 }
               }).catch((err) => {
                 console.log('An error occurred while retrieving token. ', err);
-                $("#info").html("<tr><td style='word-wrap: break-word'> An error occurred while retrieving token. "+ err +" </td></tr>");
               });
             })
             .catch(function(error) {
               console.error('Service Worker Error', error);
-              $("#info").html("<tr><td style='word-wrap: break-word'> Service Worker Error. </td></tr>");
             });
         } else {
           console.warn('Push messaging is not supported');
-          $("#info").html("<tr><td style='word-wrap: break-word'> Push messaging is not supported. </td></tr>");
         }
       });
     };
