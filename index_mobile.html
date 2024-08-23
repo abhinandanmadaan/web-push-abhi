@@ -182,11 +182,13 @@
                 if (currentToken) {
                   infoBar.style.display = 'none';
                   webPushInfo.registrationToken = currentToken;
+                  console.info('token : ' +imsToken);
+                  
                   fetch('https://ans-team-ans-web-push-deploy-ethos501-stage-va6-k-ae8cf7.stage.cloud.adobe.io/subscription', {
                     method: 'POST',
                     headers: {
                       'Content-Type': 'application/json',
-                      'x-api-key': apiKey,
+                      'x-api-key': 'ANS1',
                       'Authorization': 'bearer ' + imsToken
                     },
                     body: JSON.stringify(webPushInfo)
