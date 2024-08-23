@@ -25,7 +25,7 @@ self.addEventListener('push', function(event) {
         timestamp: pushData.notification.timestampMillis,
         vibrate: pushData.notification.vibrate,
         customData: pushData.notification.customData,
-        silent: pushData.notification.silent
+        silent: true
     };
 
     event.waitUntil(self.registration.showNotification(title, options));
