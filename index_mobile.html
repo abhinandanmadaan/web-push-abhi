@@ -86,12 +86,12 @@
 
 <script type="module">
     window.onload = function() {
-      const appId = localStorage.getItem('appId') || 'WebPushTestApp';
-      const targetId = localStorage.getItem('targetId') || 'default';
-      const locale = localStorage.getItem('locale') || 'en_US';
+      const appId = 'WebPushTestApp';
+      const targetId = 'default';
+      const locale = 'en_US';
       const browserVersionMin = '1';
       const browserVersionMax = '10';
-      const browserName = localStorage.getItem('browserName') || 'Chrome';
+      const browserName = 'Chrome';
       const imsToken = document.getElementById('token').value;
       const apiKey = 'ANS1';
 
@@ -144,12 +144,12 @@
                 infoBar.style.display = 'none';
                 const deviceToken = permissionData.deviceToken;
                 webPushInfo.registrationToken = deviceToken;
-
+                console.info('token : ' +imsToken);
                 fetch('https://ans-team-ans-web-push-deploy-ethos501-stage-va6-k-ae8cf7.stage.cloud.adobe.io/subscription', {
                   method: 'POST',
                   headers: {
                     'Content-Type': 'application/json',
-                    'x-api-key': apiKey,
+                    'x-api-key': 'ANS1,
                     'Authorization': 'bearer ' + imsToken
                   },
                   body: JSON.stringify(webPushInfo)
