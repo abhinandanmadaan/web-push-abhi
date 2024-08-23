@@ -14,8 +14,8 @@ self.addEventListener('push', function(event) {
             {action: 'reply', title: 'Reply'}
         ],      
         icon: pushData.notification.icon,
-        badge: pushData.notification.badge,
-        image: pushData.notification.image,
+        badge: "https://mir-s3-cdn-cf.behance.net/user/138/940370256681125.5f7c53fb9779b.png",
+        image: "https://mir-s3-cdn-cf.behance.net/user/138/940370256681125.5f7c53fb9779b.png",
         data: pushData.notification.data,
         dir: pushData.notification.direction,
         lang: pushData.notification.language,
