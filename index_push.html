@@ -15,7 +15,7 @@
 
         // Check if service workers are supported
         if ('serviceWorker' in navigator && 'PushManager' in window) {
-            navigator.serviceWorker.register('service-worker.js')
+            navigator.serviceWorker.register('service-worker-push.js')
                 .then(function (reg) {
                     console.log('Service Worker Registered');
 
