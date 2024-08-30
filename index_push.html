@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notification App</title>
+</head>
+
+<body>
+    <button id="subscribe">Subscribe to Notifications</button>
+    <script type="module">
+        // Your VAPID public key here
+        const publicVapidKey = 'BBDD6YggitwXb3pkkl1YodKG8mViKyanHroDNpdsHkZN-VIWqtKWI6gqwA8RWlPw46Hi3G6wxKFwcg_Zk19jtOM';
+
+        // Check if service workers are supported
+        if ('serviceWorker' in navigator && 'PushManager' in window) {
+            navigator.serviceWorker.register('service-worker.js')
+                .then(function (reg) {
+                    console.log('Service Worker Registered');
+
+                    document.getElementById('subscribe').addEventListener('click', function () {
+                        reg.pushManager.getSubscription().then(function (subscription) {
+                            subscribeUser(reg);
+                        });
+                    });
+                }).catch(function (error) {
+                    console.error('Service Worker Registration Error:', error);
+                });
+
+        }
+
+        function subscribeUser(reg) {
+            const applicationServerKey = urlBase64ToUint8Array(publicVapidKey);
+            reg.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: applicationServerKey
+            }).then(function (subscription) {
+                const webPushInfo = {
+                    appId: "ANSAppId",
+                    targetId: "shivangi",
+                    locale: "en_US",
+                    subscription: subscription
+                };
+                console.log('User is subscribed:', subscription);
+                // Send subscription to the server
+                fetch('http://localhost:8000/subscription', {
+                    method: 'POST',
+                    headers: {
+                        'x-api-key': 'ANS1',
+                        'Authorization': 'Bearer eyJhbGciOiJSUzI1NiIsIng1dSI6Imltc19uYTEtc3RnMS1rZXktYXQtMS5jZXIiLCJraWQiOiJpbXNfbmExLXN0ZzEta2V5LWF0LTEiLCJpdHQiOiJhdCJ9.eyJpZCI6IjE3MjQ5OTgzMDk0ODdfZjZhYjYzNmYtNjM1OS00OWY4LWE5MWUtNmI1MzZlYTZmNzcxX3ZhNmMyIiwidHlwZSI6ImFjY2Vzc190b2tlbiIsImNsaWVudF9pZCI6IkFOUzEiLCJ1c2VyX2lkIjoiMDM5NzcxOTc2MURENjM4NDBBNDk0MjM1QEFkb2JlSUQiLCJhcyI6Imltcy1uYTEtc3RnMSIsImFhX2lkIjoiMDM5NzcxOTc2MURENjM4NDBBNDk0MjM1QEFkb2JlSUQiLCJjdHAiOjAsImZnIjoiWVhYWEhMUEg3WjJYQjZEWjNHWk1DMklBRVk9PT09PT0iLCJzaWQiOiIxNzI0OTk4MzA5NDg3X2M4NTY3MThmLTRkOTgtNDMwOS1hODVlLTg1MWYwNGQ3MWM2YV92YTZjMiIsInJ0aWQiOiIxNzI0OTk4MzA5NDg3X2EzZDc2YmMxLWMyODEtNGVmYy04ZmVjLTJlZjk2OTEwNGRkNl92YTZjMiIsIm1vaSI6Ijg4MTdiZmM4IiwicnRlYSI6IjE3MjUwODQ3MDk0ODciLCJleHBpcmVzX2luIjoiODY0MDAwMDAiLCJjcmVhdGVkX2F0IjoiMTcyNDk5ODMwOTQ4NyIsInNjb3BlIjoib3BlbmlkIn0.W-jvuzIWOvAsaP-FK3VdTGdERsfKBMbKE9k5ehUlR3tbwLBq9wA314rOaRZDpLHq5An32QuYmPZMcM57NKeSLYUSD4J1rdaUpv95gyCkHM5wcu5S7sYCMjaNDaWAWt4ScIqZBPGsLomuMNxGMOxB2lpzh1NGvpFtBBTm-9hA9aAKP7I5s2c1VPs2BHg8bB5rHGiPrIpapmgn795z4Z5bwx5zekROFuClGEpHgR2uNfheySrg3qdkmn01WLH0GSbi6YfUHYzyRt2CHIqTJfzMICPvIvIaMOfypDtn82QOh9DwGNxbfcm6dtPAIPhjMl6siIoa7LFvQ1NKJ3r1WcIzQA',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(webPushInfo)
+                }).then(function (response) {
+                    if (response.ok) {
+                        console.log('Subscription sent to server');
+                    } else {
+                        console.error('Failed to send subscription to server');
+                    }
+                });
+            }).catch(function (error) {
+                console.error('Failed to subscribe user:', error);
+            });
+        }
+
+        function urlBase64ToUint8Array(base64String) {
+            const padding = '='.repeat((4 - base64String.length % 4) % 4);
+            const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
+            const rawData = window.atob(base64);
+            const outputArray = new Uint8Array(rawData.length);
+            for (let i = 0; i < rawData.length; i++) {
+                outputArray[i] = rawData.charCodeAt(i);
+            }
+            return outputArray;
+        }
+
+    </script>
+</body>
+
+</html>
